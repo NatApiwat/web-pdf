@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PDF to JPG</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 20px;
+    }
+    #imageTabs {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      width: 100px; /* กำหนดความกว้างของแท็บรูปภาพ */
+      overflow-y: auto; /* เพิ่มการเลื่อนแท็บแนวตั้ง */
+      max-height: 300px; /* กำหนดความสูงสูงสุดของแท็บ */
+    }
+    .image-tab {
+      cursor: pointer;
+      width: 80px; /* กำหนดขนาดของรูปภาพแท็บ */
+      height: auto;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .image-tab:hover {
+      border-color: #999;
+    }
+    #output {
+      flex: 1;
+      margin-left: 20px; /* ระยะห่างระหว่างแท็บรูปภาพกับภาพ */
+    }
+  </style>
+</head>
+<body>
+  <input type="file" id="pdfUpload" accept="application/pdf">
+  <button id="addImageButton" disabled>Add Image</button> <!-- เพิ่มปุ่ม Add Image -->
+  <div id="imageTabs"></div>
+  <div id="output"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+  
+  <script>
+    let pdfDocument = null; // เก็บข้อมูลเอกสาร PDF
+    let currentTabs = []; // เก็บรายการแท็บรูปภาพที่สร้างไว้
+
+    document.getElementById('pdfUpload').addEventListener('change', async function (event) {
+      clearPreviousData(); // เรียกฟังก์ชันเพื่อล้างข้อมูลเก่า
+
+      const file = event.target.files[0];
+      if (file.type !== 'application/pdf') {
+        alert('Please upload a PDF file.');
+        return;
+      }
+      pdfDocument = await pdfjsLib.getDocument(URL.createObjectURL(file)).promise;
+      const outputDiv = document.getElementById('output');
+      outputDiv.innerHTML = '';
+
+      const imageTabs = document.getElementById('imageTabs');
+      imageTabs.innerHTML = ''; // Clear previous image tabs
+
+      const maxTabsToShow = 6; // Maximum number of tabs to show
+
+      for (let pageNum = 1; pageNum <= pdfDocument.numPages; pageNum++) {
+        const page = await pdfDocument.getPage(pageNum);
+        const viewport = page.getViewport({ scale: 1.5 }); // ปรับขนาดรูปภาพที่แท็บ
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        const renderContext = {
+          canvasContext: context,
+          viewport: viewport
+        };
+
+        await page.render(renderContext).promise;
+        const imgDataUrl = canvas.toDataURL();
+        
+        // Create image tab
+        const tab = document.createElement('img');
+        tab.className = 'image-tab';
+        tab.src = imgDataUrl;
+        tab.alt = `Page ${pageNum}`;
+        tab.addEventListener('click', function() {
+          outputDiv.innerHTML = ''; // Clear existing content
+          const img = document.createElement('img');
+          img.src = imgDataUrl;
+          outputDiv.appendChild(img); // Display the selected page image
+        });
+
+        imageTabs.appendChild(tab);
+        currentTabs.push(tab);
+
+        // Check if exceeded maximum tabs to show
+        if (pageNum >= maxTabsToShow) {
+          imageTabs.style.overflowY = 'auto'; // Enable vertical scrollbar
+        }
+      }
+
+      // Enable the Add Image button
+      const addImageButton = document.getElementById('addImageButton');
+      addImageButton.disabled = true; // ปิดปุ่ม Add Image ในเริ่มต้น
+    });
+
+    document.getElementById('addImageButton').addEventListener('click', function() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.addEventListener('change', async function(event) {
+        const file = event.target.files[0];
+        if (!file || !file.type.startsWith('image/')) {
+          alert('Please select an image file.');
+          return;
+        }
+        const imgDataUrl = URL.createObjectURL(file);
+
+        // Display the selected image
+        const outputDiv = document.getElementById('output');
+        outputDiv.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = imgDataUrl;
+        outputDiv.appendChild(img);
+      });
+      input.click();
+    });
+
+    // Check if there are image tabs to enable/disable the Add Image button
+    document.addEventListener('click', function(event) {
+      const addImageButton = document.getElementById('addImageButton');
+      const imageTabs = document.getElementById('imageTabs');
+
+      // Check if click is inside imageTabs
+      if (event.target.classList.contains('image-tab')) {
+        addImageButton.disabled = false; // เปิดปุ่ม Add Image ถ้าคลิกที่แท็บรูปภาพ
+      } else {
+        addImageButton.disabled = true; // ปิดปุ่ม Add Image ถ้าไม่ได้คลิกที่แท็บรูปภาพ
+      }
+    });
+
+    function clearPreviousData() {
+      if (pdfDocument) {
+        pdfDocument = null;
+      }
+      const outputDiv = document.getElementById('output');
+      outputDiv.innerHTML = '';
+
+      const imageTabs = document.getElementById('imageTabs');
+      imageTabs.innerHTML = ''; // Clear previous image tabs
+
+      currentTabs = []; // Clear current tabs array
+
+      imageTabs.style.overflowY = 'hidden'; // Disable vertical scrollbar
+
+      // Disable the Add Image button again after clearing
+      const addImageButton = document.getElementById('addImageButton');
+      addImageButton.disabled = true;
+    }
+  </script>
+</body>
+</html>

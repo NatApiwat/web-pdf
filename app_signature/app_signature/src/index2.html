@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>PDF to JPG</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 20px;
+        }
+
+        #imageTabs {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            width: 100px;
+            overflow-y: auto;
+            max-height: 300px;
+        }
+
+        .image-tab {
+            cursor: pointer;
+            width: 80px;
+            height: auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .image-tab:hover {
+            border-color: #999;
+        }
+
+        #output {
+            flex: 1;
+            margin-left: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <input type="file" id="pdfUpload" accept="application/pdf">
+    <button id="addImageButton" disabled>Add Image</button>
+    <div id="imageTabs"></div>
+    <div id="output"></div>
+    <button id="exportPdfButton">Export imageTabs as PDF</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+
+    <script>
+        let pdfDocument = null;
+        let currentTabs = [];
+
+        document.getElementById('pdfUpload').addEventListener('change', async function (event) {
+            clearPreviousData();
+            const file = event.target.files[0];
+            if (file.type !== 'application/pdf') {
+                alert('Please upload a PDF file.');
+                return;
+            }
+            pdfDocument = await pdfjsLib.getDocument(URL.createObjectURL(file)).promise;
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = '';
+
+            const imageTabs = document.getElementById('imageTabs');
+            imageTabs.innerHTML = '';
+
+            const maxTabsToShow = 6;
+
+            for (let pageNum = 1; pageNum <= pdfDocument.numPages; pageNum++) {
+                const page = await pdfDocument.getPage(pageNum);
+                const viewport = page.getViewport({
+                    scale: 1.5
+                });
+
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+                await page.render(renderContext).promise;
+                const imgDataUrl = canvas.toDataURL();
+
+                const tab = document.createElement('img');
+                tab.className = 'image-tab';
+                tab.src = imgDataUrl;
+                tab.alt = `Page ${pageNum}`;
+                tab.addEventListener('click', function () {
+                    outputDiv.innerHTML = '';
+                    const img = document.createElement('img');
+                    img.src = imgDataUrl;
+                    outputDiv.appendChild(img);
+                });
+
+                imageTabs.appendChild(tab);
+                currentTabs.push(imgDataUrl);
+
+                if (pageNum >= maxTabsToShow) {
+                    imageTabs.style.overflowY = 'auto';
+                }
+            }
+
+            const addImageButton = document.getElementById('addImageButton');
+            addImageButton.disabled = true;
+        });
+
+        document.getElementById('addImageButton').addEventListener('click', function () {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.addEventListener('change', async function (event) {
+                const file = event.target.files[0];
+                if (!file || !file.type.startsWith('image/')) {
+                    alert('Please select an image file.');
+                    return;
+                }
+                const imgDataUrl = URL.createObjectURL(file);
+                const outputDiv = document.getElementById('output');
+                outputDiv.innerHTML = '';
+                const img = document.createElement('img');
+                img.src = imgDataUrl;
+                outputDiv.appendChild(img);
+            });
+            input.click();
+        });
+
+        document.getElementById('exportPdfButton').addEventListener('click', async function () {
+            const {
+                jsPDF
+            } = window.jspdf;
+
+            // Create a new jsPDF instance with A4 size
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'px',
+                format: [595, 842] // A4 dimensions in pixels at 96 DPI
+            });
+
+            for (let i = 0; i < currentTabs.length; i++) {
+                const imgDataUrl = currentTabs[i];
+
+                // Add image to PDF
+                pdf.addImage(imgDataUrl, 'PNG', 0, 0, 595, 842);
+
+                // Add a new page if not the last image
+                if (i < currentTabs.length - 1) {
+                    pdf.addPage();
+                }
+            }
+
+            // Save the generated PDF
+            pdf.save('document.pdf');
+        });
+
+        document.addEventListener('click', function (event) {
+            const addImageButton = document.getElementById('addImageButton');
+            const imageTabs = document.getElementById('imageTabs');
+            if (event.target.classList.contains('image-tab')) {
+                addImageButton.disabled = false;
+            } else {
+                addImageButton.disabled = true;
+            }
+        });
+
+        function clearPreviousData() {
+            if (pdfDocument) {
+                pdfDocument = null;
+            }
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = '';
+            const imageTabs = document.getElementById('imageTabs');
+            imageTabs.innerHTML = '';
+            currentTabs = [];
+            imageTabs.style.overflowY = 'hidden';
+            const addImageButton = document.getElementById('addImageButton');
+            addImageButton.disabled = true;
+        }
+    </script>
+</body>
+
+</html>
