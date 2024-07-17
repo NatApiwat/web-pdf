@@ -24,6 +24,9 @@ function GetPDFShow(pdfData) {
                 canvas.style.width = (canvas.width / 2) + 'px'; // ลดขนาดการแสดงผลลงครึ่งหนึ่ง
                 canvas.style.height = (canvas.height / 2) + 'px';
 
+                const width =  canvas.style.width
+                $("#pdf-container").css("width", width)
+                console.log('width :>> ', width);
                 // Render PDF page into canvas context
                 const renderContext = {
                     canvasContext: context,
@@ -116,7 +119,7 @@ $(document).ready(function () {
         // เพิ่ม Canvas ลงใน PDF
         for (let i = 0; i < canvases.length; i++) {
             const canvas = canvases[i];
-            const imgDataUrl = canvas.toDataURL('image/png', 1.0); // คุณภาพสูงสุด
+            const imgDataUrl = canvas.toDataURL('image/png', 2.0); // คุณภาพสูงสุด
             const page = pdfDoc.addPage([canvas.width, canvas.height]);
             console.log('canvas.width', canvas.width)
             console.log('canvas.height', canvas.height)
