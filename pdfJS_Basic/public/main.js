@@ -151,7 +151,6 @@ if (file && file.type.startsWith('image/')) {
 //* functions ลากวางภาพบน PDF ===================================================================================
 // หยุดการดำเนินการเริ่มต้นสำหรับอีเวนต์ที่เกี่ยวข้องกับการลากและปล่อย
 function preventDefaults(e) {
-    console.log('e :>> ', e);
     e.preventDefault();
     e.stopPropagation();
 }

@@ -12,7 +12,22 @@
     <script src="./pdf-lib/pdf-lib.min.js"></script>
     <script src="./pdf-lib/download.js"></script>
 </head>
+<style>
+    .resize-drag {
+    /* Initial state without border */
+    border: 2px solid transparent;
+}
 
+.resize-drag.resizing {
+    /* Border style when resizing */
+    border-color: rgb(122, 122, 122);
+}
+
+.resize-drag.dragging {
+    /* Border style when dragging */
+    border-color: rgb(122, 122, 122);
+}
+</style>
 <body>
     <div class="">
         <div id="tab">
@@ -56,9 +71,11 @@
                 </div>
             </div>
 
-            <div class="col-span-8 border-solid border-2 border-slate-400" style=" height:842px; overflow-y:scroll;" id="pdf-container">
-                <div></div>
+            <div class="col-span-8 "> 
+            <div class=" border-solid border-2 border-slate-400" style=" height:500px; overflow-y:scroll; position: relative;" id="pdf-container">
+                
             </div>
+        </div>
 
         </div>
     </div>
