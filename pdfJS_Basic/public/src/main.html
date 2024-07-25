@@ -5,57 +5,148 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
-    <script src="https://cdn.tailwindcss.com"></script>
 
+    <!-- google font Cat Sleep -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    
+    <!-- google font PDF -->
+    <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@900&display=swap" rel="stylesheet">
+
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/konva@9.3.12/konva.min.js"></script>
     <script src="./pdf-lib/pdf-lib.min.js"></script>
     <script src="./pdf-lib/download.js"></script>
 </head>
+    <style>
 
+        .catSleeping {
+        font-family: "Caveat", cursive;
+        font-optical-sizing: auto;
+        font-weight: 600;
+        font-style: normal;
+        }
+       .pdfFont {
+        font-family: "Inconsolata", monospace;
+        font-optical-sizing: auto;
+        font-weight: 900;
+        font-style: normal;
+        font-variation-settings:
+            "wdth" 100;
+        }
+    </style>
 <body>
     <div class="">
         <div id="tab">
-            <div class=" bg-[#E6FF94] text-center h-[80px] content-center">
-                <p class=" text-4xl text-center">Priva PDF</p>
+            <div class=" bg-[#8FD9A8] h-[80px] content-center drop-shadow-xl">
+                <!-- <p class="text-xl text-white mx-6 font-bold">Priva PDF</p> -->
+                <img class="mx-8" src="./logo_company.png" alt="">
             </div>
         </div>
-        <div class="grid grid-cols-12 gap-4 p-8">
+        <div class="grid grid-cols-12 gap-4 p-8 relative">
 
-            <div class="col-span-4" id="button">
-                <div class="grid grid-rows-12 gap-9">
-                    <div class="btn_uploadImage text-center row-span-10 ">
+            <div class="col-span-6 xl:relative xl:left-[-50px] xl:top-[-100px] 2xl:top-[-50px] 2xl:left-[-100px]" id="button">
+                    <div class="text-center text-[#112049] mt-36">
+                        <div class="xl:text-6xl 2xl:text-8xl font-bold relative xl:right-14 2xl:right-16 ">PRIVA</div>
+                        <div class="xl:text-6xl 2xl:text-8xl font-bold relative xl:left-24 2xl:left-[170px] ">PDF</div>
+                    </div>              
+                    <div class="btn_uploadImage text-center mt-5">
                         <input type="file" id="uploadPDF" name="uploadPDF" style="display: none;">
-                        <button class="btn btn-warning w-[300px] h-[60px] rounded-full" id="getUploadedPDF">
-                            Upload
+                        
+                        <button
+                            class="relative xl:left-[180px] xl:w-[250px] xl:h-[70px] 2xl:left-[300px] 2xl:mt-10 2xl:w-[350px] 2xl:h-[100px] cursor-pointer flex justify-between bg-[#D2E69C] px-3 py-2 rounded-full text-[#112049] tracking-wider shadow-xl hover:bg-[#A9B97D] hover:scale-105 duration-500 hover:ring-1 font-mono"
+                            id="getUploadedPDF">
+                            <div class="xl:text-lg xl:m-4 2xl:text-2xl 2xl:m-6">
+                                Upload PDF
+                            </div>
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke-width="2"
+                                stroke="currentColor"
+                                class="w-5 h-5 animate-bounce xl:text-lg xl:m-5 2xl:text-2xl 2xl:m-8"
+                            >
+                                <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3"
+                                ></path>
+                            </svg>
+                        </button>
+
+
+                        <!-- <button class="btn btn-warning xl:w-[200px] xl:h-[30px] 2xl:w-[400px] 2xl:h-[100px] xl:text-xl 2xl:text-3xl drop-shadow-md rounded-full text-white mt-5" id="getUploadedPDF">
+                            Upload PDF
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
-                        </button>
+                        </button> -->
                     </div>
+            </div>
 
-                    <div class="btn_uploadImage text-center row-span-10 ">
-                        <input type="file" id="" name="uploadPDF" style="display: none;">
-                        <button class="btn btn-warning w-[300px] h-[60px] rounded-full" id="">
-                            Upload
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                            </svg>
-                        </button>
-                    </div>
-
+        </div>
+        <div class="xl:mt-[-100px] 2xl:mt-[50px]">
+            <img class="absolute xl:w-20 xl:top-[410px] xl:left-20 2xl:w-[150px] 2xl:top-[650px] 2xl:left-20 rotate-[-25deg]" src="./file.png" alt="">      
+        </div>
+        <div class="xl:mt-[10px] 2xl:mt-[30px]">
+            <img class="w-full" src="./Footter(2).png" alt="">
+        </div>
+        <div class="absolute z-10 xl:left-[700px] xl:top-[10px] 2xl:left-[1000px] 2xl:top-[10px]" id="button">
+            <div class="relative 2xl:left-[-100px] 2xl:top-[-50px] top-[-50px] left-[-200px] xl:w-20 2xl:w-[160px]">
+                <img class="absolute top-[170px] left-[455px] xl:w-[600px] 2xl:w-[160px] z-10" src=".\Work_from_home-modified(1).png" alt="">
+                <div class="2xl:h-[3px] 2xl:w-[50px] xl:h-[2px] xl:w-[27px] bg-black absolute xl:top-[210px] xl:left-[500px] 2xl:top-[250px] 2xl:left-[540px] origin-left minute"></div>
+                <div class="2xl:h-[3px] 2xl:w-[40px] xl:h-[2px] xl:w-[20px] bg-black absolute xl:top-[210px] xl:left-[500px] 2xl:top-[250px] 2xl:left-[540px] origin-left hour"></div>
+            </div>
+            <div>
+                <div class="eyes_animate absolute xl:w-[6px] xl:h-[8px] xl:top-[281px] xl:left-[240px] 2xl:top-[450px] 2xl:left-[385px] 2xl:w-[8px] 2xl:h-[12px] rounded-full bg-[#5F372A]"></div>
+                <div class="eyes_animate absolute xl:w-[6px] xl:h-[8px] xl:top-[281px] xl:left-[260px] 2xl:top-[450px] 2xl:left-[418px] 2xl:w-[8px] 2xl:h-[12px] rounded-full bg-[#5F372A]"></div>
+                <img class="xl:w-[600px] 2xl:w-[1050px]" src="./Work_from_home-modified(4).png" alt="">
+                <div class="absolute xl:top-[90px] xl:left-[-180px] 2xl:top-[0px] 2xl:left-[0px]">
+                    <div class="z-10 absolute xl:top-[280px] xl:left-[300px] 2xl:top-[600px] 2xl:left-[200px] rotate-[15deg] 2xl:text-2xl xl:text-xl text-[#5F372A] catSleeping">Z</div>
+                    <div class="z-10 absolute xl:top-[280px] xl:left-[300px] 2xl:top-[600px] 2xl:left-[200px] rotate-[15deg] 2xl:text-2xl xl:text-xl text-[#5F372A] catSleeping">Z</div>
+                    <div class="z-10 absolute xl:top-[280px] xl:left-[300px] 2xl:top-[600px] 2xl:left-[200px] rotate-[15deg] 2xl:text-2xl xl:text-xl text-[#5F372A] catSleeping">Z</div>
                 </div>
             </div>
-
         </div>
 
-    </div>
-    </div>
+        <!-- <div class="absolute z-10 xl:top-[470px] xl:left-[180px] 2xl:top-[760px] 2xl:left-[240px]">
+            <img class="xl:w-[70px] 2xl:w-[100px] rotate-[75deg]" src="./sent.png" alt="">
+        </div>
+        <div class="absolute z-10 xl:top-[530px] xl:left-[300px] 2xl:top-[840px] 2xl:left-[400px]">
+            <img class="xl:w-[95px] 2xl:w-[160px] rotate-[45deg]" src="./sent.png" alt="">
+        </div>
+        <div class="absolute z-10 xl:top-[460px] xl:left-[430px] 2xl:top-[710px] 2xl:left-[600px]">
+            <img class="xl:w-[105px] 2xl:w-[180px] rotate-[10deg]" src="./sent.png" alt="">
+        </div>
+        <div class="absolute z-10 xl:top-[400px] xl:left-[520px] 2xl:top-[620px] 2xl:left-[760px]">
+            <img class="xl:w-[55px] 2xl:w-[100px] rotate-[-20deg]" src="./email1.png" alt="">
+        </div>
+        <div class="absolute z-10 xl:top-[320px] xl:left-[540px] 2xl:top-[490px] 2xl:left-[780px]">
+            <img class="xl:w-[35px] 2xl:w-[60px] rotate-[-90deg]" src="./email1.png" alt="">
+        </div>
+        <div class="absolute z-10 xl:top-[280px] xl:left-[450px] 2xl:top-[400px] 2xl:left-[640px]">
+            <img class="xl:w-[30px] 2xl:w-[50px] rotate-[-110deg]" src="./email1.png" alt="">
+        </div>
+        <div class="absolute z-0 xl:top-[280px] xl:left-[350px] 2xl:top-[360px] 2xl:left-[490px]">
+            <img class="xl:w-[25px] 2xl:w-[50px] rotate-[-160deg]" src="./email1.png" alt="">
+        </div> -->
 
+        <!-- <div class="image-1"></div> -->
+        <!-- <div class="image-2 absolute z-10 xl:top-[470px] xl:left-[180px] 2xl:top-[760px] 2xl:left-[240px] rotate-[75deg]"></div> -->
+        <div id="target" class="absolute 2xl:top-[750px] 2xl:left-[210px] 2xl:rotate-[80deg] xl:top-[480px] xl:left-[160px] xl:rotate-[80deg] xl:w-[70px] 2xl:w-[150px] hidden">
+            <img src="./sent.png" alt="">
+        </div>
+        
+    </div>
+    </div>
+      
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.js"></script>

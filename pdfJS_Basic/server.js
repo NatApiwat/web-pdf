@@ -27,6 +27,7 @@ app.get('/v2', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/src', 'view2.html'));
 });
 
+
 app.listen(port, () => {
   console.log(`Server running at <http://localhost>:${port}/`);
 });
