@@ -1,7 +1,5 @@
 
 $(document).ready(function () {
-    const { PDFDocument } = PDFLib
-    const pdfjsLib = window['pdfjs-dist/build/pdf'];
 
     $("#getUploadedPDF").on("click", function () {
         document.getElementById('uploadPDF').click();
@@ -14,16 +12,17 @@ $(document).ready(function () {
         const reader = new FileReader();
         reader.onload = function (e) {
             const pdfData = e.target.result;
+            console.log('file :>> ', file);
 
-            // Store PDF data in sessionStorage
+            // Store PDF data  insessionStorage
             sessionStorage.setItem('uploadedPDF', pdfData);
+            sessionStorage.setItem('FileName', file.name);
             console.log('PDF uploaded and stored in sessionSorage.');
 
             // Redirect to main_2.html after file upload
-            window.location.href = 'main_2';
+            window.location.href = 'EditPDF';
         };
         reader.readAsDataURL(file);
     });
-
-
 });
+
