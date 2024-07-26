@@ -9,6 +9,20 @@ $(document).ready(function () {
         const fileInput = $("#uploadPDF")[0];
         const file = fileInput.files[0];
 
+        if(typeof file === 'undefined'){
+            console.log('no file')
+        }else{
+            $("#target").removeClass('hidden')
+
+        //* animation send
+        $("#target").addClass('animate')
+        
+        setTimeout(function () {
+            $("#getUploadedPDF").addClass('animate_button')
+        },2400)
+
+        setTimeout(function () {
+        console.log('fileInput', file)
         const reader = new FileReader();
         reader.onload = function (e) {
             const pdfData = e.target.result;
@@ -23,6 +37,31 @@ $(document).ready(function () {
             window.location.href = 'EditPDF';
         };
         reader.readAsDataURL(file);
+        },3500)
+        }
+        
     });
 });
 
+        //* eyes animation
+        const elements = document.querySelectorAll('.eyes_animate');
+  
+        elements.forEach(element => {
+          function startAnimation() {
+            element.style.animation = 'eyes 0.2s linear';
+            element.addEventListener('animationend', () => {
+              element.style.animation = 'none';
+              setTimeout(startAnimation, 5000); // Delay 5 seconds
+            }, { once: true });
+          }
+  
+          startAnimation();
+        });
+
+        //* catSleep animation
+        const catSleepingElements = document.querySelectorAll('.catSleeping');
+        catSleepingElements.forEach((element, index) => {
+            element.style.setProperty('--animation-delay', `${index * 1.5}s`);
+        });
+
+        console.log(`Width: ${window.innerWidth}, Height: ${window.innerHeight}`);
