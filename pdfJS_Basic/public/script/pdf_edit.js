@@ -57,7 +57,7 @@ function GetPDFShow(pdfData) {
                     tab.dataset.pageNumber = pageNumber; // เก็บหมายเลขหน้าใน dataset
                     tab.style.width = '200px'; // ขนาดของแท็บรูปภาพ
                     tab.style.height = 'auto';
-                    tab.style.border = '2px solid rgb(165, 165, 165)'; // เส้นขอบสีขาวเริ่มต้น
+                    tab.style.border = '2px solid #d1d1d1'; // เส้นขอบสีขาวเริ่มต้น
                     tab.style.cursor = 'pointer';
                     tab.style.display = 'block';
                     tab.addEventListener('click', function () {
