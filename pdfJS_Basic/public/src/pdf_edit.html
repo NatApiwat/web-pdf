@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" /> -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://unpkg.com/konva@9.3.12/konva.min.js"></script>
+    <script src="./pdf-lib/pdf-lib.min.js"></script>
+    <script src="./pdf-lib/download.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+
+    
+</head>
+
+<style>
+    .image-tab {
+        width: 200px;
+        height: auto;
+        cursor: pointer;
+        display: block;
+        border: 2px solid rgb(165, 165, 165);
+        /* เส้นขอบสีขาวสำหรับแท็บทั่วไป */
+        border-radius: 5px;
+        /* มุมโค้งของเส้นขอบ */
+        padding: 5px;
+        /* เพิ่มพื้นที่ภายในแท็บ */
+        margin: 5px;
+        /* ระยะห่างระหว่างแท็บ */
+    }
+
+    .image-tab.selected-tab {
+        color: #ffffff;
+        background-color: rgb(165, 165, 165);
+        /* สีพื้นหลังสำหรับแท็บที่เลือก */
+    }
+
+    .pdf-page {
+        display: block;
+        margin-bottom: 20px;
+        /* เว้นระยะหน้า */
+        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+        /* เพิ่มเงาให้กรอบรูป */
+        border-radius: 5px;
+        /* กำหนดมุมของกรอบรูป */
+    }
+
+    .resize-drag {
+        /* Initial state without border */
+        border: 2px dashed transparent;
+    }
+
+    .resize-drag.resizing {
+        /* Border style when resizing */
+        border-color: rgb(165, 165, 165);
+    }
+
+    .resize-drag:hover {
+        /* Border style when resizing */
+        border-color: rgb(165, 165, 165);
+    }
+
+    .resize-drag.dragging {
+        /* Border style when dragging */
+        border-color: rgb(165, 165, 165);
+    }
+
+    .modal-overlay {
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .modal-overlay.show {
+      opacity: 1;
+    }
+    /* Modal Content Transition */
+    .modal-content {
+      transform: scale(0.9);
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    .modal-content.show {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    .saved-signatures {
+
+            border: 1px solid #ddd; /* Optional: add border for better visibility */
+            padding: 10px; /* Optional: add padding */
+            display: flex;
+            flex-wrap: wrap; /* Wrap images to next line */
+        }
+
+        .signature-wrapper {
+            width: 50%; /* 50% of container width for 2 images per row */
+            box-sizing: border-box; /* Include padding and border in the element's total width and height */
+            padding: 5px;
+             /* Add border around the wrapper */
+            /* Optional: add shadow for better visibility */
+        }
+
+        .signature-wrapper img {
+            width: 100%; /* Make image fill the wrapper */
+            height: 70px; /* Fixed height for each image */
+            object-fit: cover; /* Cover the entire area of the image */
+            border: 1px solid #000; /* Add border around the image */
+        }
+
+
+</style>
+
+<body>
+   
+    
+    <div class="">
+        <div id="tab">
+            <div class=" bg-[#E6FF94] text-center h-[80px] content-center">
+                <p class=" text-4xl text-center">Priva PDF</p>
+            </div>
+        </div>
+        <div class="grid grid-cols-12 gap-4 p-8">
+
+            <div class="col-span-2" id="button">
+                <div class=" gap-9">
+
+                    <div class="btn_uploadImage text-center">
+                        <div class="p-2" id="imageTabs"
+                            style="overflow-y: auto; height: 500px;  border: 2px solid rgb(165, 165, 165); position: relative;"></div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="col-span-8 ml-auto mr-auto">
+                <div class=" border-solid border-2 border-slate-400"
+                    style="width: 500px; height:500px;  overflow-y:scroll; position: relative;" id="pdf-container">
+
+                </div>
+            </div>
+
+            <div class="col-span-2" id="button">
+                <div class="btn_uploadImage text-center" >
+                    <button
+                        class="px-8 py-2 rounded-full bg-gradient-to-b from-blue-500 to-blue-600 text-white focus:ring-2 focus:ring-blue-400 hover:shadow-xl transition duration-200"
+                        id="getUploadedSignature" type="button">
+                        ลายเซ็น
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                    </button>
+
+                    <input type="file" id="import-image" accept="image/*" style="display: none;">
+                    <button
+                        class="px-8 py-2 rounded-full bg-gradient-to-b from-blue-500 to-blue-600 text-white focus:ring-2 focus:ring-blue-400 hover:shadow-xl transition duration-200"
+                        id="getUploadedImage">
+                        Import Image
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="w-[300px] h-[200px] overflow-y-auto mt-3 saved-signatures">
+                    <!-- Saved signatures will be appended here -->
+                </div>
+
+                <div class="btn_download text-center">
+                    <button
+                        class="px-8 py-2 rounded-full bg-gradient-to-b from-blue-500 to-blue-600 text-white focus:ring-2 focus:ring-blue-400 hover:shadow-xl transition duration-200"
+                        id="cancel-pdf">
+                        Cancel
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                   
+                    </button>
+                    <button
+                        class="px-8 py-2 rounded-full bg-gradient-to-b from-blue-500 to-blue-600 text-white focus:ring-2 focus:ring-blue-400 hover:shadow-xl transition duration-200"
+                        id="download-pdf">
+                        PDF
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                    </button>
+                    
+                </div>
+
+              
+            </div>
+        </div>
+    </div>
+
+    <div id="myModal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 modal-overlay hidden rounded-lg">
+        <div id="modalContent" class="bg-white  rounded-lg shadow-lg    modal-content">
+          <!-- Modal Header -->
+          <div class="bg-green-600 text-white p-4 rounded-t-lg">
+            <div class="flex justify-between ">
+                <h2 class="text-xl font-bold">Modal Title</h2>
+                <button class="bg-blue-500 text-white px-4 py-2 rounded btnClear" data-canvas-id="signature-pad-1">Clean</button>
+            </div>
+          </div>
+          <!-- Modal Body -->
+          <div class=" w-[600px] h-[500px]">
+            <canvas class="signature-pad" id="signature-pad-1"></canvas>
+          </div>
+          <!-- Modal Footer -->
+          <div class="bg-gray-100 border-t border-gray-300 p-4 rounded-b-lg flex justify-end ">
+            <button id="closeModalBtn" class="bg-red-500 text-white px-4 py-2 rounded mr-2" data-canvas-id="signature-pad-1">Close Modal</button>
+            <button class="bg-blue-500 text-white px-4 py-2 rounded btnSummit" data-canvas-id="signature-pad-1">Another Action</button>
+          </div>
+        </div>
+      </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script src="../script/pdf_edit.js"></script>
+</body>
+
+</html>
