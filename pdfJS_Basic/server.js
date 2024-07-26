@@ -7,7 +7,7 @@ const port = 5000; //พอร์ตของ Server ที่ใช้ในก
 app.use(express.static(path.join(__dirname, 'public')));
 
 // เส้นทาง root เสิร์ฟไฟล์ index.html
-app.get('/UploadPDF', (req, res) => {
+app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/src', 'pdf_upload.html'));
 });
 

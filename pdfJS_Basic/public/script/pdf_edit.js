@@ -484,7 +484,7 @@ $(document).ready(function () {
             sessionStorage.removeItem('uploadedPDF');
             sessionStorage.removeItem('FileName');
     
-            window.location.href = 'UploadPDF';
+            window.location.href = 'http://localhost:5000/';
         });
     });
     
@@ -493,7 +493,7 @@ $(document).ready(function () {
         sessionStorage.removeItem('uploadedPDF');
         sessionStorage.removeItem('FileName');
 
-        window.location.href = 'UploadPDF';
+        window.location.href = 'http://localhost:5000/';
     })
 
     //*---------------------------------------- Setting Drag Move ----------------------------------------*
