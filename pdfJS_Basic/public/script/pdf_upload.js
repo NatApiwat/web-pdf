@@ -64,4 +64,4 @@ $(document).ready(function () {
             element.style.setProperty('--animation-delay', `${index * 1.5}s`);
         });
 
-});
+        console.log(`Width: ${window.innerWidth}, Height: ${window.innerHeight}`);
