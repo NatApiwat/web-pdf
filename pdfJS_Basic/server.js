@@ -8,23 +8,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // เส้นทาง root เสิร์ฟไฟล์ index.html
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/src', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public/src', 'pdf_upload.html'));
 });
 
-app.get('/main', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/src', 'main.html'));
-});
-
-app.get('/main_2', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/src', 'main_2.html'));
-});
-
-app.get('/v', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/src', 'view.html'));
-});
-
-app.get('/v2', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/src', 'view2.html'));
+app.get('/EditPDF', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/src', 'pdf_edit.html'));
 });
 
 
