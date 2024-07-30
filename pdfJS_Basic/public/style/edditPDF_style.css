@@ -7,7 +7,7 @@
     /* เส้นขอบสีขาวสำหรับแท็บทั่วไป */
     border-radius: 5px;
     /* มุมโค้งของเส้นขอบ */
-    padding: 5px;
+    padding: 2px;
     /* เพิ่มพื้นที่ภายในแท็บ */
     margin: 5px;
     /* ระยะห่างระหว่างแท็บ */
@@ -68,8 +68,7 @@
 }
 
 .saved-signatures {
-
-        border: 1px solid #112049; /* Optional: add border for better visibility */
+ /* Optional: add border for better visibility */
         padding: 10px; /* Optional: add padding */
         display: flex;
         flex-wrap: wrap; /* Wrap images to next line */
@@ -85,8 +84,14 @@
 
     .signature-wrapper img {
         width: 100%; /* Make image fill the wrapper */
-        height: 70px; /* Fixed height for each image */
+        height: 115px; /* Fixed height for each image */
         object-fit: cover; /* Cover the entire area of the image */
         border: 2px solid #d1d1d1; /* Add border around the image */
         border-radius: 5px;
+    }
+
+    .signature-wrapper img:hover {
+
+        border: 2px solid #112049; /* Add border around the image */
+
     }

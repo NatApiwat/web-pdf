@@ -1,12 +1,15 @@
 let imageCounter = 0;
+let savedSignatures = [];
 
 //*---------------------------------------- Get PDF ----------------------------------------*
-function GetPDFShow(pdfData) {
+async function GetPDFShow(pdfData) {
     const pdfjsLib = window['pdfjs-dist/build/pdf'];
 
-    pdfjsLib.getDocument({
-        data: atob(pdfData.split(',')[1])
-    }).promise.then(pdf => {
+    try {
+        const pdf = await pdfjsLib.getDocument({
+            data: atob(pdfData.split(',')[1])
+        }).promise;
+
         const pdfContainer = document.getElementById('pdf-container');
         pdfContainer.innerHTML = '';
 
@@ -15,140 +18,93 @@ function GetPDFShow(pdfData) {
 
         let pagePositions = []; // เก็บตำแหน่ง y ของแต่ละหน้า
 
-        // วนลูปแต่ละหน้าใน PDF
         for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+            const page = await pdf.getPage(pageNumber);
+            const scale = 3;
+            const viewport = page.getViewport({ scale: scale });
 
-            pdf.getPage(pageNumber).then(page => {
+            const div = document.createElement('div');
+            div.id = `page-${pageNumber}`;
+            div.className = 'pdf-page'; // เพิ่มคลาสสำหรับหน้า PDF
+            div.style.display = 'block';
 
-                const scale = 3;
-                const viewport = page.getViewport({
-                    scale: scale
-                });
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
 
-                const div = document.createElement('div');
-                div.id = `page-${pageNumber}`;
-                div.className = 'pdf-page'; // เพิ่มคลาสสำหรับหน้า PDF
-                div.style.display = 'block';
+            canvas.style.width = (canvas.width / 3) + 'px'; // ลดขนาดการแสดงผลลงครึ่งหนึ่ง
+            canvas.style.height = (canvas.height / 3) + 'px';
 
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
+            const width = canvas.style.width
+            $("#pdf-container").css("width", width)
 
-                canvas.style.width = (canvas.width / 3) + 'px'; // ลดขนาดการแสดงผลลงครึ่งหนึ่ง
-                canvas.style.height = (canvas.height / 3) + 'px';
+            const renderContext = {
+                canvasContext: context,
+                viewport: viewport
+            };
 
-                // console.log('canvas.style.width :>> ', canvas.style.width);
+            await page.render(renderContext).promise;
 
-                const width = canvas.style.width
-                $("#pdf-container").css("width", width)
-
-                // Render PDF page into canvas context
-                const renderContext = {
-                    canvasContext: context,
-                    viewport: viewport
-                };
-
-                page.render(renderContext).promise.then(() => {
-
-                    // สร้างและเพิ่มแท็บรูปภาพ
-                    const tab = document.createElement('div');
-                    tab.className = 'image-tab';
-                    tab.dataset.pageNumber = pageNumber; // เก็บหมายเลขหน้าใน dataset
-                    tab.style.width = '200px'; // ขนาดของแท็บรูปภาพ
-                    tab.style.height = 'auto';
-                    tab.style.border = '2px solid #d1d1d1'; // เส้นขอบสีขาวเริ่มต้น
-                    tab.style.cursor = 'pointer';
-                    tab.style.display = 'block';
-                    tab.addEventListener('click', function () {
-                        // เลื่อน pdfContainer ไปยังตำแหน่งที่เกี่ยวข้อง
-                        pdfContainer.scrollTop = pagePositions[pageNumber - 1];
-                
-                        // ลบคลาส 'selected-tab' จากแท็บทั้งหมด
-                        document.querySelectorAll('.image-tab').forEach(tab => tab.classList.remove('selected-tab'));
-                
-                        // เพิ่มคลาส 'selected-tab' ให้กับแท็บที่ถูกคลิก
-                        this.classList.add('selected-tab');
-                    });
-                
-                    const tabImage = document.createElement('img');
-                    tabImage.src = canvas.toDataURL(); // ใช้ data URL ของ canvas เป็นรูปแท็บ
-                    tabImage.alt = `Page ${pageNumber}`;
-                    tabImage.style.width = '100%'; // ขนาดของรูปภาพในแท็บ
-                    tab.appendChild(tabImage);
-                
-                    const tabLabel = document.createElement('div');
-                    tabLabel.textContent = `Page ${pageNumber}`;
-                    tabLabel.style.textAlign = 'center'; // จัดข้อความให้อยู่ตรงกลาง
-                    tab.appendChild(tabLabel);
-                
-                    imageTabs.appendChild(tab);
-                
-                    // เพิ่ม canvas ลงใน div และเพิ่ม div ลงใน pdfContainer
-                    div.appendChild(canvas);
-                    pdfContainer.appendChild(div);
-                
-                    // ตั้งค่าให้แท็บแรกเป็น 'selected-tab' เริ่มต้น
-                    if (pageNumber === 1) {
-                        tab.classList.add('selected-tab');
-                    }
-                
-                    // เก็บตำแหน่ง y ของหน้า
-                    const tabHeight = tab.offsetHeight; // ความสูงของแท็บรูปภาพ
-                    pagePositions.push(div.offsetTop - tabHeight); // เว้นระยะหน้า
-                });
-                
-
-            });
-        }
-
-        // อีเวนต์เมื่อคลิกที่แท็บภาพ
-        document.querySelectorAll('.image-tab').forEach(tab => {
+            const tab = document.createElement('div');
+            tab.className = 'image-tab';
+            tab.dataset.pageNumber = pageNumber; // เก็บหมายเลขหน้าใน dataset
+            tab.style.width = '140px';
+            tab.style.height = 'auto';
+            tab.style.marginLeft = 'auto';
+            tab.style.marginRight = 'auto';
+            tab.style.border = '2px solid #d1d1d1';
+            tab.style.cursor = 'pointer';
+            tab.style.display = 'block';
             tab.addEventListener('click', function () {
-                // หาหมายเลขหน้าที่คลิก
-                const pageNumber = parseInt(this.dataset.pageNumber);
-
-                // เลื่อน pdfContainer ไปยังตำแหน่งที่เกี่ยวข้อง
-                pdfContainer.scrollTo({
-                    top: pagePositions[pageNumber - 1],
-                    behavior: 'smooth'
-                });
-
-                // ตรวจสอบและเพิ่มคลาส 'selected-tab' ให้กับแท็บภาพที่ถูกคลิก
+                pdfContainer.scrollTop = pagePositions[pageNumber - 1];
                 document.querySelectorAll('.image-tab').forEach(tab => tab.classList.remove('selected-tab'));
                 this.classList.add('selected-tab');
-
-                // อัปเดตหน้าปัจจุบัน
-                currentPage = pageNumber;
             });
-        });
 
-        // อีเวนต์เมื่อเลื่อน pdfContainer
+            const tabImage = document.createElement('img');
+            tabImage.src = canvas.toDataURL();
+            tabImage.alt = `Page ${pageNumber}`;
+            tabImage.style.width = '100%';
+            tab.appendChild(tabImage);
+
+            const tabLabel = document.createElement('div');
+            tabLabel.textContent = ` ${pageNumber}`;
+            tabLabel.style.textAlign = 'center';
+            // tabLabel.style.color='#19456B'
+            // tabLabel.style.fontWeight="bold"
+            tab.appendChild(tabLabel);
+
+            imageTabs.appendChild(tab);
+
+            div.appendChild(canvas);
+            pdfContainer.appendChild(div);
+
+            if (pageNumber === 1) {
+                tab.classList.add('selected-tab');
+            }
+
+            const tabHeight = tab.offsetHeight;
+            pagePositions.push(div.offsetTop - tabHeight);
+        }
+
         pdfContainer.addEventListener('scroll', function () {
             for (let i = 0; i < pagePositions.length; i++) {
-
-                let mapScroll = pdfContainer.scrollTop + 50; // เพิ่มค่า offset เพื่อปรับให้แม่นยำขึ้น
-
+                let mapScroll = pdfContainer.scrollTop + 50;
                 if (mapScroll >= pagePositions[i] && (i === pagePositions.length - 1 || mapScroll < pagePositions[i + 1])) {
-
                     document.querySelectorAll('.image-tab').forEach(tab => tab.classList.remove('selected-tab'));
-                    // เพิ่มคลาส 'selected-tab' ให้กับแท็บภาพที่เกี่ยวข้อง
                     const selectedTab = document.querySelector(`.image-tab[data-page-number="${i + 1}"]`);
-
                     if (selectedTab) {
                         selectedTab.classList.add('selected-tab');
-                        currentPage = i + 1;
-
                     }
                     break;
                 }
             }
         });
 
-
-    }).catch(error => {
+    } catch (error) {
         console.error('Error loading PDF:', error);
-    });
+    }
 }
 
 //*---------------------------------------- Setting Drag Move  ----------------------------------------*
@@ -170,7 +126,6 @@ function handleDrop(e) {
 
     pdfjsLib.getDocument({ data: atob(pdfData.split(',')[1]) }).promise.then(pdf => {
         let pageNumber = 1; // Initialize pageNumber
-
         // Find the page number within the viewport
         for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
             const container = document.getElementById('page-' + pageNum);
@@ -255,25 +210,44 @@ function importImage(pageNumber, event) {
                 let img = new Image();
                 img.onload = function () {
                     // Create an img element
-                    let newImg = document.createElement('img');
-                    newImg.src = e.target.result;
+                    // let newImg = document.createElement('img');
+                    // newImg.src = e.target.result;
     
                     // Optionally, set the size and position of the image
-                    newImg.style.position = 'absolute';
-                    newImg.style.left = '0px';
-                    newImg.style.top = '0px';
-                    newImg.style.width = img.width / 2 + 'px';
-                    newImg.style.height = img.height / 2 + 'px';
+                    // newImg.style.position = 'absolute';
+                    // newImg.style.left = '0px';
+                    // newImg.style.top = '0px';
+                    // newImg.style.width = img.width / 2 + 'px';
+                    // newImg.style.height = img.height / 2 + 'px';
     
                     // Set a unique id for the img element
-                    let imageId = `image-${Date.now()}`;
-                    newImg.id = imageId;
-                    newImg.className = 'resize-drag';
-    
+                    // let imageId = `image-${Date.now()}`;
+                    // newImg.id = imageId;
+                    // newImg.className = 'resize-drag';
+
+                    let wrapper = document.createElement('div');
+                    wrapper.className = 'signature-wrapper';
+
+                    // Create an img element for the saved image
+                    let savedImg = document.createElement('img');
+                    savedImg.src = e.target.result;
+                    savedImg.draggable = true;
+
+                    savedImg.ondragstart = function(event) {
+                        event.dataTransfer.setData('text/plain', savedImg.src);
+                    };
+
+                    // Append the saved image to the wrapper and then to the saved signatures container
+                    wrapper.appendChild(savedImg);
+                    document.querySelector('.saved-signatures').appendChild(wrapper);
+
+                    // Push the image data URL to savedSignatures
+                    savedSignatures.push(e.target.result);
+
                     // Append the img element to the container holding the canvas of the specified page
-                    let container = document.getElementById(`page-${pageNumber}`);
-                        container.style.position = 'relative';
-                        container.appendChild(newImg);
+                    // let container = document.getElementById(`page-${pageNumber}`);
+                    //     container.style.position = 'relative';
+                    //     container.appendChild(newImg);
                         
 
                 };
@@ -286,7 +260,6 @@ function importImage(pageNumber, event) {
     }
    
 }
-
 
 $(document).ready(function () {
 
@@ -301,7 +274,6 @@ $(document).ready(function () {
     
 
     let signaturePads = {};
-    let savedSignatures = [];
 
     const modal = document.getElementById('myModal');
     const modalContent = document.getElementById('modalContent');
@@ -368,12 +340,13 @@ $(document).ready(function () {
             img.ondragstart = function(event) {
                 event.dataTransfer.setData('text/plain', img.src);
             };
-            savedSignatures.push(signatureDataURL);
 
-            wrapper.appendChild(img);
-           $('.saved-signatures').append(wrapper);
+            // savedSignatures.push(signatureDataURL);
             signaturePad.clear();
             modal.classList.remove('show');
+            wrapper.appendChild(img);
+            document.querySelector('.saved-signatures').appendChild(wrapper);
+
         }
     })
 
@@ -426,24 +399,28 @@ $(document).ready(function () {
         const divs = document.querySelectorAll('div[id^="page-"]');
         const fileName = sessionStorage.getItem('FileName');
         const canvases = [];
-    
+        
         // แสดง SweetAlert2 เริ่มต้น
-        Swal.fire({
-            title: "กําลังดาวน์โหลด PDF ",
-            html: "กรุณารอสักครู่...<b>0%</b>",
+         Swal.fire({
+            title: "กำลังดาวน์โหลด PDF",
             timerProgressBar: true,
-            timer: 1500, // ตั้งเวลาสำหรับการทำงานทั้งหมด, ปรับตามที่ต้องการ
+            html: "<div>กรุณารอสักครู่...<b>0%</b></div>",
             didOpen: () => {
                 Swal.showLoading();
             },
         });
     
         // Convert divs to Canvas and store in array
-        for (const div of divs) {
+        for (let i = 0; i < divs.length; i++) {
+            const div = divs[i];
             const canvas = await html2canvas(div, {
                 scale: 3,
             });
             canvases.push(canvas);
+    
+            // Update progress after each canvas is processed
+            const progress = Math.round(((i + 1) / divs.length) * 100);
+            Swal.getPopup().querySelector('b').textContent = `${progress}%`;
         }
     
         // Add Canvas to PDF
@@ -465,10 +442,10 @@ $(document).ready(function () {
                 height: pageHeight,
             });
     
-            // Update progress
-            const progress = Math.round(((i + 1) / canvases.length) * 100);
-            // Update SweetAlert2 with progress
-            Swal.getPopup().querySelector("b").textContent = `Progress: ${progress}%`;
+            // // Update progress
+            // const progress = Math.round(((i + 1) / canvases.length) * 100);
+            // // Update SweetAlert2 with progress
+            // Swal.getPopup().querySelector("b").textContent = `Progress: ${progress}%`;
         }
     
         // Save PDF and download
@@ -477,7 +454,7 @@ $(document).ready(function () {
     
         // Hide SweetAlert2 when done
         Swal.fire({
-            title: 'ดาวน์โหลดสําเร็จ',
+            title: 'ดาวน์โหลดสำเร็จ',
             icon: 'success',
             confirmButtonText: 'OK'
         }).then(() => {
@@ -487,6 +464,7 @@ $(document).ready(function () {
             window.location.href = 'http://localhost:5000/';
         });
     });
+    
     
     //* Cancel ไฟล์ PDF
     $("#cancel-pdf").on("click", function () {
